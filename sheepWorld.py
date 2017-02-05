@@ -35,17 +35,21 @@ def main():
     clock = pygame.time.Clock() #create a pygame clock object
     playtime = 0.0 #milliseconds elapsed since start of game.
     planet = pc.Planet()
+    sheep = sc.Sheep()
+    sheepSet = {sheep}
     while True:
         milliseconds = clock.tick(FPS)
         playtime += milliseconds
         deltaTime = milliseconds / 1000.0
         #^ clock.tick() returns number of milliseconds passed since last frame
         #FPS is otional. passing it causes a delay so that you dont go faster than FPS in your game
-        step()
+        step(sheepSet)
 
 
 
-def step():
+def step(sheepSet):
+    for sheep in sheepSet:
+        sheep.draw(background, size)
     screen.blit(background, (0, 0)) 
     #for animal in animals: animal.draw
     pygame.event.get()
@@ -53,9 +57,6 @@ def step():
     if pressed[pygame.K_ESCAPE]: 
         pygame.quit()
     pygame.display.flip()
-
-
-
 
 if __name__ == "__main__":
     print("hello world")
