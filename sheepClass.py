@@ -45,7 +45,6 @@ class Strategy(object):
         sheepSqAges = [sheep.age**2 for sheep in sheepList]
         totalSqAge = sum(sheepSqAges)
         mateProbs = [sqAge / totalSqAge for sqAge in sheepSqAges]
-
         mates = set()
         for unusedVariable in range(numMates):
             p = np.random.random()
