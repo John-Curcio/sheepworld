@@ -14,6 +14,17 @@ class Sheep(ac.Animal):
 #This object contains a sheep's entire genetic material.
 class Strategy(object):
 
+    """
+    numGenes refers to how many distances a sheep recognizes. For example, if 
+    numGenes = 1, then the sheep treats all animals as equidistant. 
+
+    sheepDistWeights refers to the weight a sheep assigns to another sheep, 
+    given the distance separating them. Similarly for wolfDistWeights.
+    
+    sheepWeight refers to how heavily a sheep should weigh the sum of 
+    weighted sheep relative position vecotrs, compared to the relative 
+    position vector of a wolf.
+    """
     def __init__(self, **kwargs):
         self.mutationRate = 0.05
         if "mutationRate" in kwargs:
@@ -21,15 +32,10 @@ class Strategy(object):
         numGenes = 5
         if "numGenes" in kwargs:
             numGenes = kwargs["numGenes"]
-        # sheepDistWeights refers to the weight a sheep assigns to another sheep, 
-        # given the distance separating them. Similarly for wolfDistWeights.
         self.sheepDistWeights = np.array([random.random()] * numGenes)
         self.sheepDistWeights = np.linalg.norm(self.sheepDistWeights)
         self.wolfDistWeights = np.array([random.random()] * numGenes)
         self.wolfDistWeights = np.linalg.norm(self.wolfDistWeights)
-        # sheepWeight refers to how heavily a sheep should weigh the sum of 
-        # weighted sheep relative position vecotrs, compared to the relative 
-        # position vector of a wolf.
         self.sheepWeight = random.random()
         self.wolfWeight = 1 - self.sheepWeight
 

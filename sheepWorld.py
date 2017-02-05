@@ -1,6 +1,10 @@
 #########################################
-# Author: John Curcio                   #
-# I hope you find this code interesting!#
+# 
+#  
+#     |
+# [}^8|]> oh hey its wild bill hickok! i thought you were dead! what are you doing here in sheepworld?
+#     |   
+#     
 #########################################
 
 #Libraries
@@ -9,18 +13,50 @@ from pygame.locals import *
 #Custom modules
 import planetClass as pc
 import sheepClass as sc
-########################
-#
+################################################################################
+###Global variables
+pygame.init() 
+#set up the window
+size = width, height = 1000, 1000
+screen = pygame.display.set_mode(size) #set size of game window
+background = pygame.Surface(screen.get_size()) #create empty surface
+background.fill((0, 100, 230)) #fill surface with some color
+background = background.convert()   
+#^ not 100% necessary, just makes things faster, I'm told.
+#surfaces with transparency need .convert_alpha() instead
 
-
-def init():
-    planet = pc.Planet()
+#after creating the background, the surface isn't visible yet.
+#need to blit (~paint) it in order to see it 
+screen.blit(background, (0, 0)) #(0,0) is upper left corner
+################################################################################
 
 def main():
+    FPS = 20 #desired frame rate in frames per second.
+    clock = pygame.time.Clock() #create a pygame clock object
+    playtime = 0.0 #milliseconds elapsed since start of game.
+    planet = pc.Planet()
+    while True:
+        milliseconds = clock.tick(FPS)
+        playtime += milliseconds
+        deltaTime = milliseconds / 1000.0
+        #^ clock.tick() returns number of milliseconds passed since last frame
+        #FPS is otional. passing it causes a delay so that you dont go faster than FPS in your game
+        step()
 
+
+
+def step():
+    screen.blit(background, (0, 0)) 
+    #for animal in animals: animal.draw
+    pygame.event.get()
+    pressed = pygame.key.get_pressed()
+    if pressed[pygame.K_ESCAPE]: 
+        pygame.quit()
+    pygame.display.flip()
 
 
 
 
 if __name__ == "__main__":
     print("hello world")
+    main()
