@@ -13,9 +13,9 @@ class Animal(object):
         self.Surface = pygame.Surface((2 * self.r, 2 * self.r))
         self.Surface.convert_alpha()
         self.Surface.set_colorkey((0, 0, 0)) #black is transparent.
-        self.color = (255, 255, 255)
+        self.color = color
 
-    def draw(self, background, size):
+    def draw(self, screen, size):
         mappedPos = (min(size)/(2*np.pi) ) * self.pos
-        background.blit(self.Surface, (round(mappedPos[0] - self.r), round(mappedPos[1] - self.r)))
-        pygame.draw.circle(background, self.color, (int(round(mappedPos[0])), int(round(mappedPos[1]))), self.r)
+        screen.blit(self.Surface, (round(mappedPos[0] - self.r), round(mappedPos[1] - self.r)))
+        pygame.draw.circle(screen, self.color, (int(round(mappedPos[0])), int(round(mappedPos[1]))), self.r)

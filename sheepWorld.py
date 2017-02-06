@@ -13,6 +13,7 @@ from pygame.locals import *
 #Custom modules
 import planetClass as pc
 import sheepClass as sc
+import playerClass as debug
 ################################################################################
 ###Global variables
 pygame.init() 
@@ -28,6 +29,14 @@ background = background.convert()
 #after creating the background, the surface isn't visible yet.
 #need to blit (~paint) it in order to see it 
 screen.blit(background, (0, 0)) #(0,0) is upper left corner
+
+#The following is useful for debugging, but may be useful for other stuff later
+debugMode = True
+arrowsToDirs = {pygame.K_DOWN:[0,1], 
+                pygame.K_UP:[0,-1], 
+                pygame.K_LEFT:[-1,0], 
+                pygame.K_RIGHT:[1,0]}
+
 ################################################################################
 
 def main():
@@ -35,29 +44,41 @@ def main():
     clock = pygame.time.Clock() #create a pygame clock object
     playtime = 0.0 #milliseconds elapsed since start of game.
     planet = pc.Planet()
-    sheep = sc.Sheep()
-    sheepSet = {sheep}
+    maxHerdSize = 10
+    sheepSet = set()
+    player = debug.Player()
+    for i in range(maxHerdSize):
+        sheepSet.add(sc.Sheep())
     while True:
         milliseconds = clock.tick(FPS)
         playtime += milliseconds
         deltaTime = milliseconds / 1000.0
         #^ clock.tick() returns number of milliseconds passed since last frame
         #FPS is otional. passing it causes a delay so that you dont go faster than FPS in your game
+        screen.blit(background, (0, 0)) 
         step(sheepSet)
+        player.move()
+        player.draw(screen, size)
+        pygame.display.flip()
 
-
+"""
+doHerdStuff takes care of everything the herd must do at every time step. This 
+includes breeding, planning moves, executing moves, and drawing.
+"""
+def doHerdStuff(screen, sheepSet, wolf=None):
+    for s in sheepSet:
+        s.planMove(sheepSet.difference({s}), wolf)
+    for sheep in sheepSet:
+        sheep.move()
+        sheep.draw(screen, size)
 
 def step(sheepSet):
-    for sheep in sheepSet:
-        sheep.draw(background, size)
-    screen.blit(background, (0, 0)) 
-    #for animal in animals: animal.draw
+    doHerdStuff(screen, sheepSet)
     pygame.event.get()
     pressed = pygame.key.get_pressed()
     if pressed[pygame.K_ESCAPE]: 
         pygame.quit()
-    pygame.display.flip()
+    
 
 if __name__ == "__main__":
-    print("hello world")
     main()
