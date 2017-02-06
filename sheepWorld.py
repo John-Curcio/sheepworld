@@ -57,8 +57,11 @@ def main():
         #FPS is otional. passing it causes a delay so that you dont go faster than FPS in your game
         screen.blit(background, (0, 0)) 
         step(sheepSet)
+        #debug stuff
         player.move()
         player.draw(screen, size)
+
+        # V don't you dare remove this!
         pygame.display.flip()
 
 """

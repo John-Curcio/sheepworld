@@ -9,7 +9,7 @@ class Sheep(ac.Animal):
     def __init__(self):
         ac.Animal.__init__(self, speed=0.01)
         self.age = 1 # yes, not zero. 
-        self.strategy = Strategy(self, numGenes=8)
+        self.strategy = Strategy(self, numGenes=20)
         self.plannedDir = np.array([1.0, 0.0]) 
 
     def planMove(self, sheepSet, wolf=None):
@@ -17,14 +17,14 @@ class Sheep(ac.Animal):
         sheepSet = sheepSet.difference({self})
         for sheep in sheepSet:
             sheepVec += self.strategy.getWeightedDistVec(self.strategy.sheepDistWeights, sheep)
-        sheepVec = np.linalg.norm(sheepVec)
+        sheepVec /= np.linalg.norm(sheepVec)
         
         wolfVec = np.array([0.0, 0.0])
         if wolf != None:
             wolfVec = self.strategy.getWeightedDistVec(self.strategy.wolfDistWeights, wolf)
 
         self.plannedDir = self.strategy.sheepWeight * sheepVec + self.strategy.wolfWeight * wolfVec
-        self.plannedDir = np.linalg.norm(self.plannedDir)
+        self.plannedDir /= np.linalg.norm(self.plannedDir)
 
     def move(self):
         self.pos += self.speed * self.plannedDir
@@ -32,7 +32,6 @@ class Sheep(ac.Animal):
 
 
 class Strategy(object):
-
     """
     This object contains a sheep's entire genetic material.
 
@@ -47,7 +46,7 @@ class Strategy(object):
     position vector of a wolf.
     """
     def __init__(self, owner, **kwargs):
-        self.owner = owner #owner refers to the sheep to whom this strategy belongs.
+        self.owner = owner #owner refers to the sheep that owns this strategy
         self.mutationRate = 0.05
         if "mutationRate" in kwargs:
             self.mutationRate = kwargs["mutationRate"]
@@ -117,7 +116,6 @@ class Strategy(object):
             a = animal.pos[i] - self.owner.pos[i]
             b = 2*np.pi - animal.pos[i] - self.owner.pos[i]
             shortestDistVec[i] = valWithMinAbs(a, b)
-        shortestDistVec = np.array(shortestDistVec)
         shortestDist = sum([x**2 for x in shortestDistVec])**0.5 
         # ^ this is the shortest angular distance, which is proportional to the 
         #length of the shortest path from two points on a sphere
@@ -125,7 +123,7 @@ class Strategy(object):
         n = len(weights)
         for i in range(n):
             if (maxDist * (i+1) / n) >= shortestDist:
-                return weights[i] * np.linalg.norm(shortestDistVec)
+                return (weights[i] * shortestDistVec / np.linalg.norm(shortestDistVec))
         print("Couldn't find the right weight. Here's the distance: " + str(shortestDist))
         print("...and here's the shortestDistVector: " + str(shortestDistVec))
         print("...and here's animal.pos - self.owner.pos: " + str(animal.pos - self.owner.pos))
