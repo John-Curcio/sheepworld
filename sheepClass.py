@@ -6,8 +6,12 @@ import animalClass as ac
 
 class Sheep(ac.Animal):
 
-    def __init__(self):
-        ac.Animal.__init__(self, speed=0.01)
+    def __init__(self, **kwargs):
+        speed = 0.01
+        color = (0, 0, 0)
+        if "speed" in kwargs: speed = kwargs["speed"]
+        if "color" in kwargs: color = kwargs["color"]
+        ac.Animal.__init__(self, speed=speed, color=color)
         self.age = 1 # yes, not zero. 
         self.strategy = Strategy(self, numGenes=20)
         self.plannedDir = np.array([1.0, 0.0]) 

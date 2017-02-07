@@ -5,7 +5,7 @@ import pygame
 
 class Animal(object):
 
-    def __init__(self, speed=5.0, color=(0, 0, 0)):
+    def __init__(self, speed=5.0, color=(0, 0, 0)): #TODO: **kwargs
         self.pos = np.array([random.uniform(0.0, 2*np.pi), random.uniform(0.0, 2*np.pi)])
         self.r = 10
         # ^ rho and theta, respectively

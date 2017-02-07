@@ -46,7 +46,8 @@ def main():
     planet = pc.Planet()
     maxHerdSize = 10
     sheepSet = set()
-    player = debug.Player()
+    player = debug.Player(pos=(size[0]/2, size[1]/2), speed=0.05, color=(255, 0, 0))
+    sheepSet.add(player)
     for i in range(maxHerdSize):
         sheepSet.add(sc.Sheep())
     while True:
@@ -58,8 +59,8 @@ def main():
         screen.blit(background, (0, 0)) 
         step(sheepSet)
         #debug stuff
-        player.move()
-        player.draw(screen, size)
+        # player.move()
+        # player.draw(screen, size)
 
         # V don't you dare remove this!
         pygame.display.flip()
