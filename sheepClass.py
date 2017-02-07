@@ -71,13 +71,13 @@ class Strategy(object):
         numGenes = 7
         if "numGenes" in kwargs:
             numGenes = kwargs["numGenes"]
-        # self.sheepDistWeights = np.array([random.random() for _ in range((numGenes - 2)//2)])
-        self.sheepDistWeights = np.array([1 for i in range((numGenes - 2)//2)])
+        self.sheepDistWeights = np.array([random.randrange(-1, 1) for _ in range((numGenes - 2)//2)])
+        # self.sheepDistWeights = np.array([1 for i in range((numGenes - 2)//2)])
         mag = np.linalg.norm(self.sheepDistWeights)
         if mag > 0:
             self.sheepDistWeights = self.sheepDistWeights / mag
-        # self.wolfDistWeights = np.array([random.random() for _ in range((numGenes - 2)//2)])
-        self.wolfDistWeights = np.array([1 for i in range((numGenes - 2)//2)])
+        self.wolfDistWeights = np.array([random.randrange(-1, 1) for _ in range((numGenes - 2)//2)])
+        # self.wolfDistWeights = np.array([1 for i in range((numGenes - 2)//2)])
         mag = np.linalg.norm(self.wolfDistWeights)
         if mag > 0:
             self.wolfDistWeights = self.wolfDistWeights / mag

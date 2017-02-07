@@ -35,7 +35,7 @@ def main():
     clock = pygame.time.Clock() #create a pygame clock object
     playtime = 0.0 #milliseconds elapsed since start of game.
     planet = pc.Planet()
-    maxHerdSize = 1
+    maxHerdSize = 10
     sheepSet = set()
     player = debug.Player(pos=(1/2, 1/2), speed=0.05, color=(255, 0, 0))
     sheepSet.add(player)
@@ -56,6 +56,8 @@ doHerdStuff takes care of everything the herd must do at every time step. This
 includes breeding, planning moves, executing moves, and drawing.
 """
 def doHerdStuff(screen, sheepSet, wolf=None):
+    if wolf != None:
+        wolf.move()
     for s in sheepSet:
         s.planMove(sheepSet.difference({s}), wolf)
     for sheep in sheepSet:
