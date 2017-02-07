@@ -13,7 +13,13 @@ import pygame
 class Player(sc.Sheep):
 
     def __init__(self, **kwargs):
-        sc.Sheep.__init__(self, **kwargs)
+        sc.Sheep.__init__(self)
+        speed = 0.01
+        color = (255, 0, 0)
+        if "speed" in kwargs: 
+            self.speed = kwargs["speed"]
+        if "color" in kwargs: 
+            self.color = kwargs["color"]
         if "pos" in kwargs:
             self.pos = kwargs["pos"]
         self.pos = np.array([random.random() for _ in range(2)])
@@ -21,11 +27,6 @@ class Player(sc.Sheep):
                     pygame.K_UP:[0,-1], 
                     pygame.K_LEFT:[-1,0], 
                     pygame.K_RIGHT:[1,0]}
-
-    def move(self):
-        for i in range(len(self.plannedDir)):
-            self.pos[i] += self.speed * self.plannedDir[i]
-        self.pos %= (2*np.pi)
 
     def planMove(self, sheepSet, wolf):
         self.plannedDir = np.array([0.0, 0.0])

@@ -5,8 +5,13 @@ import pygame
 
 class Animal(object):
 
-    def __init__(self, speed=5.0, color=(0, 0, 0)): #TODO: **kwargs
-        self.pos = np.array([random.uniform(0.0, 2*np.pi), random.uniform(0.0, 2*np.pi)])
+    def __init__(self, **kwargs):
+        speed = 0.005
+        color = (0, 0, 0)
+        if "speed" in kwargs: self.speed = kwargs["speed"]
+        if "color" in kwargs: self.color = kwargs["color"]
+        self.pos = np.array([random.random(), random.random()])
+        self.plannedDir = np.array([0.0, 0.0])
         self.r = 10
         # ^ rho and theta, respectively
         self.speed = speed
@@ -15,7 +20,34 @@ class Animal(object):
         self.Surface.set_colorkey((0, 0, 0)) #black is transparent.
         self.color = color
 
+    def move(self):
+        self.pos = (self.pos + self.speed * self.plannedDir) % 1
+
+    def getShortestDistVec(self, B):
+        vecWithMinMag = None
+        minMag = None
+        # for x in {0.0, -1.0, 1.0}:
+            # for y in {0.0, -1.0, 1.0}:
+        for x in {0.0, 1.0, -1.0}:
+            for y in {0.0, 1.0, -1.0}:
+                vec = B.pos - self.pos + np.array([x, y])
+                mag = np.linalg.norm(vec)
+                if minMag == None or mag < minMag:
+                    minMag = mag
+                    vecWithMinMag = vec
+        return vecWithMinMag
+
     def draw(self, screen, size):
-        mappedPos = (min(size)/(2*np.pi) ) * self.pos
+        mappedPos = np.array((size[0]*self.pos[0], size[1]*self.pos[1]))
         screen.blit(self.Surface, (round(mappedPos[0] - self.r), round(mappedPos[1] - self.r)))
         pygame.draw.circle(screen, self.color, (int(round(mappedPos[0])), int(round(mappedPos[1]))), self.r)
+        # V probably great for debugging. Shows the step that this animal just took.
+        pygame.draw.line(screen, self.color, mappedPos, mappedPos - 2*self.r*self.plannedDir, 2)
+
+
+def valWithMinAbs(*args):
+    val = None
+    for x in args:
+        if val == None or abs(x) < abs(val):
+            val = x
+    return val

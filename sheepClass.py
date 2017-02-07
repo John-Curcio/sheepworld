@@ -14,25 +14,37 @@ class Sheep(ac.Animal):
         ac.Animal.__init__(self, speed=speed, color=color)
         self.age = 1 # yes, not zero. 
         self.strategy = Strategy(self, numGenes=20)
-        self.plannedDir = np.array([1.0, 0.0]) 
 
+    """ a sheep's intended direction is a linear combination of the minimum 
+    relative position vectors between the sheep and other sheep and the minimum
+    relative position vector between the sheep and the wolf. The weights are in
+    the sheep's genetic material.
+
+    if a sheep is undecided - i.e. its intended direction has magnitude zero -
+    then it stays still
+    """
     def planMove(self, sheepSet, wolf=None):
         sheepVec = np.array([0.0, 0.0])
         sheepSet = sheepSet.difference({self})
         for sheep in sheepSet:
-            sheepVec += self.strategy.getWeightedDistVec(self.strategy.sheepDistWeights, sheep)
-        sheepVec /= np.linalg.norm(sheepVec)
+            sheepVec = sheepVec + self.strategy.getWeightedDistVec(self.strategy.sheepDistWeights, sheep)
+        mag = np.linalg.norm(sheepVec)
+        if mag != 0:
+            sheepVec = sheepVec / mag
         
         wolfVec = np.array([0.0, 0.0])
         if wolf != None:
-            wolfVec = self.strategy.getWeightedDistVec(self.strategy.wolfDistWeights, wolf)
-
+            tempVec = self.strategy.getWeightedDistVec(self.strategy.wolfDistWeights, wolf)
+            if np.linalg.norm(tempVec) > 0:
+                wolfVec = tempVec
         self.plannedDir = self.strategy.sheepWeight * sheepVec + self.strategy.wolfWeight * wolfVec
-        self.plannedDir /= np.linalg.norm(self.plannedDir)
+        mag = np.linalg.norm(self.plannedDir)
+        if mag != 0:
+            self.plannedDir = self.plannedDir / mag
 
     def move(self):
         self.pos += self.speed * self.plannedDir
-        self.pos = self.pos % (2*np.pi)
+        self.pos = self.pos % 1
 
 
 class Strategy(object):
@@ -59,14 +71,16 @@ class Strategy(object):
         numGenes = 7
         if "numGenes" in kwargs:
             numGenes = kwargs["numGenes"]
-        self.sheepDistWeights = np.array([random.random() for _ in range((numGenes - 2)//2)])
+        # self.sheepDistWeights = np.array([random.random() for _ in range((numGenes - 2)//2)])
+        self.sheepDistWeights = np.array([1 for i in range((numGenes - 2)//2)])
         mag = np.linalg.norm(self.sheepDistWeights)
         if mag > 0:
-            self.sheepDistWeights /= mag
-        self.wolfDistWeights = np.array([random.random() for _ in range((numGenes - 2)//2)])
+            self.sheepDistWeights = self.sheepDistWeights / mag
+        # self.wolfDistWeights = np.array([random.random() for _ in range((numGenes - 2)//2)])
+        self.wolfDistWeights = np.array([1 for i in range((numGenes - 2)//2)])
         mag = np.linalg.norm(self.wolfDistWeights)
         if mag > 0:
-            self.wolfDistWeights /= mag
+            self.wolfDistWeights = self.wolfDistWeights / mag
         self.sheepWeight = random.random()
         self.wolfWeight = 1 - self.sheepWeight
 
@@ -115,22 +129,17 @@ class Strategy(object):
         return mates
 
     def getWeightedDistVec(self, weights, animal):
-        shortestDistVec = np.array([0.0, 0.0])
-        for i in range(len(animal.pos)):
-            a = animal.pos[i] - self.owner.pos[i]
-            b = 2*np.pi - animal.pos[i] - self.owner.pos[i]
-            shortestDistVec[i] = valWithMinAbs(a, b)
-        shortestDist = sum([x**2 for x in shortestDistVec])**0.5 
-        # ^ this is the shortest angular distance, which is proportional to the 
-        #length of the shortest path from two points on a sphere
-        maxDist = np.sqrt(2) * np.pi
+        shortestDistVec = self.owner.getShortestDistVec(animal)
+        shortestDist = np.linalg.norm(shortestDistVec)
+        maxDist = 1/np.sqrt(2)
         n = len(weights)
         for i in range(n):
             if (maxDist * (i+1) / n) >= shortestDist:
                 return (weights[i] * shortestDistVec / np.linalg.norm(shortestDistVec))
         print("Couldn't find the right weight. Here's the distance: " + str(shortestDist))
         print("...and here's the shortestDistVector: " + str(shortestDistVec))
-        print("...and here's animal.pos - self.owner.pos: " + str(animal.pos - self.owner.pos))
+        print("...and here's animal.pos: " + str(animal.pos))
+        print("...and here's self.owner.pos" + str(self.owner.pos))
         assert(False)
 
 
@@ -167,13 +176,6 @@ def getMinAngle(u, v):
     cos = np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
     return np.arccos(cos)
 
-
-def getShortestDistVec(a, b): #want to get from point A to point B, as always.
-    result = np.array([0.0]*len(b))
-    for i in range(len(result)):
-        result[i] = valWithMinAbs((b - a)[i], (2*np.pi - a - b)[i])
-    return result
-
 def getVariance(A):
     n = len(A)
     mean = 0
@@ -188,9 +190,3 @@ def getVariance(A):
 def sigmoid(t):
     return 1/(1 + np.exp(-1*t))
 
-def valWithMinAbs(*args):
-    val = None
-    for x in args:
-        if val == None or abs(x) < abs(val):
-            val = x
-    return val

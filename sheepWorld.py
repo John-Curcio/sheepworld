@@ -1,12 +1,3 @@
-#########################################
-# 
-#  
-#     |
-# [}^8|]> oh hey its wild bill hickok! i thought you were dead! what are you doing here in sheepworld?
-#     |   
-#     
-#########################################
-
 #Libraries
 import pygame
 from pygame.locals import *
@@ -44,12 +35,12 @@ def main():
     clock = pygame.time.Clock() #create a pygame clock object
     playtime = 0.0 #milliseconds elapsed since start of game.
     planet = pc.Planet()
-    maxHerdSize = 10
+    maxHerdSize = 1
     sheepSet = set()
-    player = debug.Player(pos=(size[0]/2, size[1]/2), speed=0.05, color=(255, 0, 0))
+    player = debug.Player(pos=(1/2, 1/2), speed=0.05, color=(255, 0, 0))
     sheepSet.add(player)
     for i in range(maxHerdSize):
-        sheepSet.add(sc.Sheep())
+        sheepSet.add(sc.Sheep(numGenes=3))
     while True:
         milliseconds = clock.tick(FPS)
         playtime += milliseconds
@@ -58,11 +49,6 @@ def main():
         #FPS is otional. passing it causes a delay so that you dont go faster than FPS in your game
         screen.blit(background, (0, 0)) 
         step(sheepSet)
-        #debug stuff
-        # player.move()
-        # player.draw(screen, size)
-
-        # V don't you dare remove this!
         pygame.display.flip()
 
 """
