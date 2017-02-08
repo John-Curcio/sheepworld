@@ -4,9 +4,12 @@ from pygame.locals import *
 #Custom modules
 import planetClass as pc
 import sheepClass as sc
+import wolfClass as wc
 import playerClass as debug
 ################################################################################
 ###Global variables
+
+##Graphics
 pygame.init() 
 #set up the window
 size = width, height = 1000, 1000
@@ -21,6 +24,7 @@ background = background.convert()
 #need to blit (~paint) it in order to see it 
 screen.blit(background, (0, 0)) #(0,0) is upper left corner
 
+##Debugging
 #The following is useful for debugging, but may be useful for other stuff later
 debugMode = True
 arrowsToDirs = {pygame.K_DOWN:[0,1], 
@@ -31,16 +35,24 @@ arrowsToDirs = {pygame.K_DOWN:[0,1],
 ################################################################################
 
 def main():
-    FPS = 20 #desired frame rate in frames per second.
+    FPS = 3 #desired frame rate in frames per second.
     clock = pygame.time.Clock() #create a pygame clock object
     playtime = 0.0 #milliseconds elapsed since start of game.
     planet = pc.Planet()
-    maxHerdSize = 10
+    maxHerdSize = 25
+    numMates = 5
+    minHerdSize = 20
+    #paramDict is a dictionary of this simulation's parameters.
+    paramDict = {   "maxHerdSize": maxHerdSize, 
+                    "minHerdSize": minHerdSize, 
+                    "numMates": numMates}
     sheepSet = set()
-    player = debug.Player(pos=(1/2, 1/2), speed=0.05, color=(255, 0, 0))
-    sheepSet.add(player)
+    # player = debug.Player(pos=(1/2, 1/2), speed=0.05, color=(255, 0, 0))
+    # sheepSet.add(player)
     for i in range(maxHerdSize):
         sheepSet.add(sc.Sheep(numGenes=3))
+    wolf = wc.Wolf(color=(255,255,255), speed=0.04)
+
     while True:
         milliseconds = clock.tick(FPS)
         playtime += milliseconds
@@ -48,24 +60,35 @@ def main():
         #^ clock.tick() returns number of milliseconds passed since last frame
         #FPS is otional. passing it causes a delay so that you dont go faster than FPS in your game
         screen.blit(background, (0, 0)) 
-        step(sheepSet)
+        step(sheepSet, paramDict, wolf)
         pygame.display.flip()
 
 """
 doHerdStuff takes care of everything the herd must do at every time step. This 
 includes breeding, planning moves, executing moves, and drawing.
 """
-def doHerdStuff(screen, sheepSet, wolf=None):
-    if wolf != None:
-        wolf.move()
+def doHerdStuff(screen, sheepSet, paramDict, wolf=None):
     for s in sheepSet:
         s.planMove(sheepSet.difference({s}), wolf)
     for sheep in sheepSet:
         sheep.move()
         sheep.draw(screen, size)
+    if len(sheepSet) <= paramDict["minHerdSize"]:
+        newSheepSet = set()
+        for sheep in sheepSet:
+            sheep.age += 1
+            mates = sheep.strategy.chooseMates(sheepSet, paramDict["numMates"])
+            baby = sc.breed(mates.union({sheep}))
+            newSheepSet.add(baby)
+        sheepSet = sheepSet.union(newSheepSet)
 
-def step(sheepSet):
-    doHerdStuff(screen, sheepSet)
+
+
+def step(sheepSet, paramDict, wolf=None):
+    if wolf != None:
+        wolf.hunt(sheepSet)
+        wolf.draw(screen, size)
+    doHerdStuff(screen, sheepSet, paramDict, wolf)
     pygame.event.get()
     pressed = pygame.key.get_pressed()
     if pressed[pygame.K_ESCAPE]: 

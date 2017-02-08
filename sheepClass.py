@@ -72,12 +72,10 @@ class Strategy(object):
         if "numGenes" in kwargs:
             numGenes = kwargs["numGenes"]
         self.sheepDistWeights = np.array([random.randrange(-1, 1) for _ in range((numGenes - 2)//2)])
-        # self.sheepDistWeights = np.array([1 for i in range((numGenes - 2)//2)])
         mag = np.linalg.norm(self.sheepDistWeights)
         if mag > 0:
             self.sheepDistWeights = self.sheepDistWeights / mag
         self.wolfDistWeights = np.array([random.randrange(-1, 1) for _ in range((numGenes - 2)//2)])
-        # self.wolfDistWeights = np.array([1 for i in range((numGenes - 2)//2)])
         mag = np.linalg.norm(self.wolfDistWeights)
         if mag > 0:
             self.wolfDistWeights = self.wolfDistWeights / mag
@@ -85,34 +83,32 @@ class Strategy(object):
         self.wolfWeight = 1 - self.sheepWeight
 
     def asList(self):
-        return [self.sheepWeight] + [self.wolfWeight] + [self.sheepDistWeights] + [self.wolfDistWeights]
+        return ([self.sheepWeight] + 
+                [self.wolfWeight] + 
+                list(self.sheepDistWeights) + 
+                list(self.wolfDistWeights))
 
     """
     Calculate the total variance in the strategies, and have the mutation rate 
     be the inverse square root of that. 
+    Var(X) = E[X**2] - E[X]**2
     Wish there were a more mathematically-justified way to do this, but hey,
     it's a learning experience.
     """
     def getMutationRate(self, parents):
         nParents = len(parents)
-        sqMean = 0.0
-        meanSq = 0.0
+        variance = 0.0
         for parent in parents:
-            foo = np.array(parent.strategy.asList())
-            sqMean += sum(foo)
-            meanSqVec += sum(foo**2)
-        sqMean *= sqMean
-        n = nParents*len(parents)
-        variance = (meanSqVec - sqMean) / n
+            variance += getVariance(parent.strategy.asList())
         return max(variance**-0.5, 0.0001)
 
     """
     This sheep wants to have a baby, so it needs mate(s).
     There may be any number of mates >=2.
-    Older sheep probably did something good to live so long, so they're sexier,
-    i.e. more likely to be chosen as mates.
+    Older sheep probably did something good to live so long, so they're more 
+    attractive, i.e. more likely to be chosen as mates.
     """
-    def chooseMates(sheepSet, numMates): 
+    def chooseMates(self, sheepSet, numMates): 
         sheepList = list( sheepSet.difference({self.owner}) )
         sheepSqAges = [sheep.age**2 for sheep in sheepList]
         totalSqAge = sum(sheepSqAges)
@@ -121,11 +117,15 @@ class Strategy(object):
         for _ in range(numMates):
             p = np.random.random()
             cumulative = 0
-            for i in range(len(mateProbs)):
+            i = 0
+            mateFound = False
+            while (i < len(mateProbs) and not mateFound):
                 cumulative += mateProbs[i]
                 if p >= cumulative:
                     mates.add(sheepList[i])
-                    break
+                    mateFound = True
+                i += 1
+            assert(mateFound)
         return mates
 
     def getWeightedDistVec(self, weights, animal):
@@ -146,30 +146,31 @@ class Strategy(object):
 def breed(parents): 
     #parents is a set of sheep. there may be an arbitrary number of parents
     sheep3 = Sheep()
+    strategy3 = sheep3.strategy
     nParents = len(parents)    
-    mutationRate = getMutationRate(parents)
-    for i in range(len(sheep3.strategy.sheepDistWeights)):
+    mutationRate = strategy3.getMutationRate(parents)
+    for i in range(len(strategy3.sheepDistWeights)):
         #for each gene of the new strategy, randomly choose a subset of parents,
         #and set this gene to be the average of the i'th genes of the subset of
         #parents
         k = random.randrange(1, nParents)
         parentSubset = random.sample(parents, k)
-        sheep3.sheepDistWeights[i] = 0.0
-        sheep3.wolfDistWeights[i] = 0.0
+        strategy3.sheepDistWeights[i] = 0.0
+        strategy3.wolfDistWeights[i] = 0.0
         for parent in parentSubset:
-            sheep3.sheepDistWeights[i] += parent.sheepDistWeights[i]
-            sheep3.wolfDistWeights[i] += parent.wolfDistWeights[i]
-        sheep3.sheepDistWeights[i] /= k
-        sheep3.wolfDistWeights[i] /= k
+            strategy3.sheepDistWeights[i] += parent.strategy.sheepDistWeights[i]
+            strategy3.wolfDistWeights[i] += parent.strategy.wolfDistWeights[i]
+        strategy3.sheepDistWeights[i] /= k
+        strategy3.wolfDistWeights[i] /= k
         #mutations also occur, but their severity is determined by the 
         #mutationRate, not necessarily their frequency.
-        sheep3.sheepDistWeights[i] += random.gauss(0.0, sheep3.strategy.mutationRate)
-        sheep3.wolfDistWeights[i] += random.gauss(0.0, sheep3.strategy.mutationRate)
+        strategy3.sheepDistWeights[i] += random.gauss(0.0, mutationRate)
+        strategy3.wolfDistWeights[i] += random.gauss(0.0, mutationRate)
     #sheepWeight varies according to a logistic model
-    t = np.log(sheep3.sheepWeight / (1 - sheep3.sheepWeight))
-    t += random.gauss(0.0, sheep3.strategy.mutationRate)
-    sheep3.sheepWeight += sigmoid(t)
-    sheep3.wolfWeight = 1 - sheep3.sheepWeight
+    t = np.log(strategy3.sheepWeight / (1 - strategy3.sheepWeight))
+    t += random.gauss(0.0, mutationRate)
+    strategy3.sheepWeight += sigmoid(t)
+    strategy3.wolfWeight = 1 - strategy3.sheepWeight
     return sheep3
 
 def getMinAngle(u, v):

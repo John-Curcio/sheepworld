@@ -10,24 +10,23 @@ class Animal(object):
         color = (0, 0, 0)
         if "speed" in kwargs: self.speed = kwargs["speed"]
         if "color" in kwargs: self.color = kwargs["color"]
+        self.speed = speed
+        self.color = color
         self.pos = np.array([random.random(), random.random()])
         self.plannedDir = np.array([0.0, 0.0])
         self.r = 10
         # ^ rho and theta, respectively
-        self.speed = speed
         self.Surface = pygame.Surface((2 * self.r, 2 * self.r))
         self.Surface.convert_alpha()
         self.Surface.set_colorkey((0, 0, 0)) #black is transparent.
-        self.color = color
 
     def move(self):
         self.pos = (self.pos + self.speed * self.plannedDir) % 1
 
+    #B is another animal
     def getShortestDistVec(self, B):
         vecWithMinMag = None
         minMag = None
-        # for x in {0.0, -1.0, 1.0}:
-            # for y in {0.0, -1.0, 1.0}:
         for x in {0.0, 1.0, -1.0}:
             for y in {0.0, 1.0, -1.0}:
                 vec = B.pos - self.pos + np.array([x, y])
