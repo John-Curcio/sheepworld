@@ -12,7 +12,8 @@ class Animal(object):
         if "color" in kwargs: self.color = kwargs["color"]
         self.speed = speed
         self.color = color
-        self.pos = np.array([random.random(), random.random()])
+        self.pos = None
+        self.randomizePos()
         self.plannedDir = np.array([0.0, 0.0])
         self.r = 10
         # ^ rho and theta, respectively
@@ -23,6 +24,8 @@ class Animal(object):
     def move(self):
         self.pos = (self.pos + self.speed * self.plannedDir) % 1
 
+    def randomizePos(self):
+        self.pos = np.array([random.random(), random.random()])
     #B is another animal
     def getShortestDistVec(self, B):
         vecWithMinMag = None

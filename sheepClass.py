@@ -63,7 +63,7 @@ class Strategy(object):
     """
     def __init__(self, owner, **kwargs):
         self.owner = owner #owner refers to the sheep that owns this strategy
-        self.mutationRate = 0.05
+        self.mutationRate = 0.5
         if "mutationRate" in kwargs:
             self.mutationRate = kwargs["mutationRate"]
         if "color" in kwargs:
@@ -104,7 +104,8 @@ class Strategy(object):
 
     """
     This sheep wants to have a baby, so it needs mate(s).
-    There may be any number of mates >=2.
+    There may be any number of mates >=2. Also possible for this sheep to choose
+    another sheep more than once.
     Older sheep probably did something good to live so long, so they're more 
     attractive, i.e. more likely to be chosen as mates.
     """
@@ -112,20 +113,30 @@ class Strategy(object):
         sheepList = list( sheepSet.difference({self.owner}) )
         sheepSqAges = [sheep.age**2 for sheep in sheepList]
         totalSqAge = sum(sheepSqAges)
+        if totalSqAge == 0:
+            sheepSqAges = [1 / len(sheepList)] * len(sheepList)
+            totalSqAge = 1
         mateProbs = [sqAge / totalSqAge for sqAge in sheepSqAges]
-        mates = set()
-        for _ in range(numMates):
+        mates = [None] * numMates
+        for mate in range(numMates):
             p = np.random.random()
             cumulative = 0
             i = 0
             mateFound = False
             while (i < len(mateProbs) and not mateFound):
                 cumulative += mateProbs[i]
-                if p >= cumulative:
-                    mates.add(sheepList[i])
+                if cumulative >= p:
+                    mates[mate] = sheepList[i]
                     mateFound = True
                 i += 1
-            assert(mateFound)
+            if not mateFound:
+                # print(cumulative)
+                # print(p)
+                # print(mateProbs)
+                return None
+        if len(mates) != numMates:
+            # print(len(mates))
+            return None
         return mates
 
     def getWeightedDistVec(self, weights, animal):
@@ -182,7 +193,7 @@ def getVariance(A):
     mean = 0
     meanSq = 0
     for a in A:
-        meanSq += a
+        meanSq += a**2
         mean += a
     meanSq /= n
     mean /= n

@@ -35,13 +35,13 @@ arrowsToDirs = {pygame.K_DOWN:[0,1],
 ################################################################################
 
 def main():
-    FPS = 3 #desired frame rate in frames per second.
+    FPS = 30 #desired frame rate in frames per second.
     clock = pygame.time.Clock() #create a pygame clock object
     playtime = 0.0 #milliseconds elapsed since start of game.
     planet = pc.Planet()
     maxHerdSize = 25
-    numMates = 5
-    minHerdSize = 20
+    numMates = 2
+    minHerdSize = 10
     #paramDict is a dictionary of this simulation's parameters.
     paramDict = {   "maxHerdSize": maxHerdSize, 
                     "minHerdSize": minHerdSize, 
@@ -60,7 +60,7 @@ def main():
         #^ clock.tick() returns number of milliseconds passed since last frame
         #FPS is otional. passing it causes a delay so that you dont go faster than FPS in your game
         screen.blit(background, (0, 0)) 
-        step(sheepSet, paramDict, wolf)
+        sheepSet = step(sheepSet, paramDict, wolf)
         pygame.display.flip()
 
 """
@@ -74,26 +74,39 @@ def doHerdStuff(screen, sheepSet, paramDict, wolf=None):
         sheep.move()
         sheep.draw(screen, size)
     if len(sheepSet) <= paramDict["minHerdSize"]:
-        newSheepSet = set()
         for sheep in sheepSet:
             sheep.age += 1
-            mates = sheep.strategy.chooseMates(sheepSet, paramDict["numMates"])
-            baby = sc.breed(mates.union({sheep}))
-            newSheepSet.add(baby)
+        newSheepSet = set()
+        for sheep in sheepSet:
+            sheep.randomizePos()
+            candidates = sheepSet.difference({sheep})
+            mates = sheep.strategy.chooseMates(candidates, paramDict["numMates"])
+            if mates == None:
+                print("mate-finding failed")
+                pygame.quit()
+                return
+            mates.append(sheep)
+            newSheepSet.add(sc.breed(mates))
+        print("another generation passed")
         sheepSet = sheepSet.union(newSheepSet)
-
+    return sheepSet
 
 
 def step(sheepSet, paramDict, wolf=None):
     if wolf != None:
         wolf.hunt(sheepSet)
         wolf.draw(screen, size)
-    doHerdStuff(screen, sheepSet, paramDict, wolf)
+    # print("before:", len(sheepSet))
+    sheepSet = doHerdStuff(screen, sheepSet, paramDict, wolf)
+    # print("after:", len(sheepSet))
+    # if len(sheepSet) < paramDict["minHerdSize"]:
+    #     print("it's too small", len(sheepSet))
     pygame.event.get()
     pressed = pygame.key.get_pressed()
     if pressed[pygame.K_ESCAPE]: 
         pygame.quit()
-    
+
+    return sheepSet
 
 if __name__ == "__main__":
     main()
