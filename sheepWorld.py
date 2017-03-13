@@ -35,7 +35,7 @@ arrowsToDirs = {pygame.K_DOWN:[0,1],
 ################################################################################
 
 def main():
-    FPS = 60 #desired frame rate in frames per second.
+    FPS = 30 #desired frame rate in frames per second.
     clock = pygame.time.Clock() #create a pygame clock object
     playtime = 0.0 #milliseconds elapsed since start of game.
     planet = pc.Planet()
@@ -68,6 +68,8 @@ def main():
 """
 doHerdStuff takes care of everything the herd must do at every time step. This 
 includes breeding, planning moves, executing moves, and drawing.
+
+TODO: this ought to be located in sheepClass.py
 """
 def doHerdStuff(screen, sheepSet, paramDict, wolf=None):
     for s in sheepSet:

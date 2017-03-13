@@ -110,8 +110,7 @@ class Strategy(object):
             geneSumSquares = sum([gene**2 for gene in parentGenes])
             totalVariance += np.mean(geneSumSquares) - np.mean(parentGenes)
             #variance is additive
-        print(totalVariance)
-        return totalVariance**-0.5
+        return (totalVariance**-0.5 / len(parentStrategies[0]))
 
     """
     This sheep wants to have a baby, so it needs mate(s).
@@ -154,6 +153,7 @@ class Strategy(object):
         for i in range(n):
             if (maxDist * (i+1) / n) >= shortestDist:
                 return (weights[i] * shortestDistVec / np.linalg.norm(shortestDistVec))
+        # useful print statements for debugging
         print("Couldn't find the right weight. Here's the distance: " + str(shortestDist))
         print("...and here's the shortestDistVector: " + str(shortestDistVec))
         print("...and here's animal.pos: " + str(animal.pos))
@@ -161,6 +161,7 @@ class Strategy(object):
         assert(False)
 
 
+# TODO: needs crossover
 def breed(parents): 
     #parents is a set of sheep. there may be an arbitrary number of parents
     sheep3 = Sheep(numGenes=len(parents[0].strategy.asList()))
