@@ -6,10 +6,10 @@ import pygame
 class Animal(object):
 
     def __init__(self, **kwargs):
-        speed = 0.005
+        speed = 0
         color = (0, 0, 0)
-        if "speed" in kwargs: self.speed = kwargs["speed"]
-        if "color" in kwargs: self.color = kwargs["color"]
+        if "speed" in kwargs: speed = kwargs["speed"]
+        if "color" in kwargs: color = kwargs["color"]
         self.speed = speed
         self.color = color
         self.pos = None

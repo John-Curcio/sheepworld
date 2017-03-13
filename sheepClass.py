@@ -9,11 +9,13 @@ class Sheep(ac.Animal):
     def __init__(self, **kwargs):
         speed = 0.01
         color = (0, 0, 0)
+        numGenes = 20
         if "speed" in kwargs: speed = kwargs["speed"]
         if "color" in kwargs: color = kwargs["color"]
+        if "numGenes" in kwargs: numGenes = kwargs["numGenes"]
         ac.Animal.__init__(self, speed=speed, color=color)
         self.age = 1 # yes, not zero. 
-        self.strategy = Strategy(self, numGenes=20)
+        self.strategy = Strategy(self, numGenes=numGenes)
 
     """ a sheep's intended direction is a linear combination of the minimum 
     relative position vectors between the sheep and other sheep and the minimum
@@ -98,9 +100,18 @@ class Strategy(object):
     def getMutationRate(self, parents):
         nParents = len(parents)
         variance = 0.0
-        for parent in parents:
-            variance += getVariance(parent.strategy.asList())
-        return max(variance**-0.5, 0.0001)
+
+        totalVariance = 0.0
+        parentStrategies = [parent.strategy.asList() for parent in parents]
+
+        geneSumSquares = 0.0
+        for geneIndex in range(len(parentStrategies[0])):
+            parentGenes = [strategy[geneIndex] for strategy in parentStrategies]
+            geneSumSquares = sum([gene**2 for gene in parentGenes])
+            totalVariance += np.mean(geneSumSquares) - np.mean(parentGenes)
+            #variance is additive
+        print(totalVariance)
+        return totalVariance**-0.5
 
     """
     This sheep wants to have a baby, so it needs mate(s).
@@ -130,12 +141,8 @@ class Strategy(object):
                     mateFound = True
                 i += 1
             if not mateFound:
-                # print(cumulative)
-                # print(p)
-                # print(mateProbs)
                 return None
         if len(mates) != numMates:
-            # print(len(mates))
             return None
         return mates
 
@@ -156,7 +163,7 @@ class Strategy(object):
 
 def breed(parents): 
     #parents is a set of sheep. there may be an arbitrary number of parents
-    sheep3 = Sheep()
+    sheep3 = Sheep(numGenes=len(parents[0].strategy.asList()))
     strategy3 = sheep3.strategy
     nParents = len(parents)    
     mutationRate = strategy3.getMutationRate(parents)

@@ -35,23 +35,25 @@ arrowsToDirs = {pygame.K_DOWN:[0,1],
 ################################################################################
 
 def main():
-    FPS = 30 #desired frame rate in frames per second.
+    FPS = 60 #desired frame rate in frames per second.
     clock = pygame.time.Clock() #create a pygame clock object
     playtime = 0.0 #milliseconds elapsed since start of game.
     planet = pc.Planet()
     maxHerdSize = 25
-    numMates = 2
+    numMates = 3
     minHerdSize = 10
+    numGenes = 10
     #paramDict is a dictionary of this simulation's parameters.
     paramDict = {   "maxHerdSize": maxHerdSize, 
                     "minHerdSize": minHerdSize, 
-                    "numMates": numMates}
+                    "numMates": numMates,
+                    "numGenes": numGenes}
     sheepSet = set()
     # player = debug.Player(pos=(1/2, 1/2), speed=0.05, color=(255, 0, 0))
     # sheepSet.add(player)
     for i in range(maxHerdSize):
-        sheepSet.add(sc.Sheep(numGenes=3))
-    wolf = wc.Wolf(color=(255,255,255), speed=0.04)
+        sheepSet.add(sc.Sheep(numGenes=numGenes))
+    wolf = wc.Wolf(color=(255,255,255), speed=0.02)
 
     while True:
         milliseconds = clock.tick(FPS)
@@ -87,7 +89,7 @@ def doHerdStuff(screen, sheepSet, paramDict, wolf=None):
                 return
             mates.append(sheep)
             newSheepSet.add(sc.breed(mates))
-        print("another generation passed")
+        # print("another generation passed")
         sheepSet = sheepSet.union(newSheepSet)
     return sheepSet
 
