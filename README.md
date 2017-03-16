@@ -1,3 +1,5 @@
+![shaun](shaun.png)
+
 ## Dependencies
 Python 3, pygame, NumPy
 
