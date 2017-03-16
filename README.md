@@ -19,11 +19,11 @@ Sheepworld is a world where sheep are stranded on a meadow planet where a wolf r
 
 After only a few minutes spent on sheepworld, you'll probably notice that the sheep are quick learners. The image below is a typical arrangement of the sheep population at generation 5 or so. They're so young that they haven't even realized that wolves are dangerous!
 
-![early](early\ \stages.JPG)
+![early](early\ stages.JPG)
 
 After about 20 generations, though, not only do the sheep turn tail from the wolf without hesitation - the sheep have discovered that there is *great safety in numbers and close quarters.* 
 
-![later](selfish\ \herd.JPG)
+![later](selfish\ herd.JPG)
 
 ## Some more notes:
 
